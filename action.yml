@@ -1,0 +1,37 @@
+name: "scalified/cloudflare-purge-cache-action"
+description: "Purges Cloudflare cache"
+author: "Scalified"
+branding:
+  icon: "cloud"
+  color: "gray-dark"
+
+inputs:
+  zone-id:
+    description: "Cloudflare Zone ID"
+    required: true
+  email:
+    description: "Cloudflare Account Email"
+    required: true
+  api-token:
+    description: "Cloudflare API Token"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: purge-cache
+      name: "Purge Cache"
+      env:
+        INPUT_ZONE_ID: ${{ inputs.zone-id }}
+        INPUT_EMAIL: ${{ inputs.email }}
+        INPUT_API_TOKEN: ${{ inputs.api-token }}
+        CACHE_URL: "https://api.cloudflare.com/client/v4/zones/${{ inputs.zone-id }}/purge_cache"
+      run: |
+        # 🧹 Purge Cloudflare cache
+        curl -Lvf "$CACHE_URL" \
+          -H "X-Auth-Email: $INPUT_EMAIL" \
+          -H "Authorization: Bearer $INPUT_API_TOKEN" \
+          -H 'Content-Type: application/json' \
+          --data '{"purge_everything":true}'
+        echo "✅ Cloudflare cache has been purged"
+      shell: bash
